@@ -1,0 +1,36 @@
+version: "3.8"
+
+services:
+  news:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - .:/news
+    container_name: sitenews
+    ports:
+      - "8001:8000"
+    restart: always
+    environment:
+      - SECRET_KEY="babe00e8e11d559c4c2e0d445da9a58245524a2f2efab76ac61f70e86a02f0f3"
+      - DEBUG=1
+      - ALLOWED_HOSTS=127.0.0.1 0.0.0.0
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=admin
+      - POSTGRES_DB=site_news
+      - POSTGRES_HOST=postgres
+      - POSTGRES_PORT=5432
+    command: sh -c "python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
+    depends_on:
+      - db
+
+  db:
+    container_name: sitenews2
+    hostname: postgres
+    image: postgres:15.3-alpine3.18
+    restart: always
+    environment:
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=admin
+      - POSTGRES_DB=site_news
+      - POSTGRES_HOST_AUTH_METHOD=trust
