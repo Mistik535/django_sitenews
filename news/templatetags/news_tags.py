@@ -1,9 +1,8 @@
 from django import template
 from django.db.models import Count
 
-import news.views as views
 from news.models import Category, TagPost
-from news.utils import menu
+from users.context_processors import menu
 
 register = template.Library()
 

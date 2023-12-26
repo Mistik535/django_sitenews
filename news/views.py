@@ -1,16 +1,13 @@
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.paginator import Paginator
-from django.http import HttpResponse, HttpResponseNotFound, Http404, HttpResponseRedirect, HttpResponsePermanentRedirect
-from django.shortcuts import render, redirect, get_object_or_404
-from django.urls import reverse, reverse_lazy
-from django.template.loader import render_to_string
-from django.template.defaultfilters import slugify
-from django.views import View
-from django.views.generic import TemplateView, ListView, DetailView, FormView, CreateView, UpdateView
+from django.http import HttpResponse, HttpResponseNotFound
+from django.shortcuts import render, get_object_or_404
+from django.urls import reverse_lazy
+from django.views.generic import ListView, DetailView, CreateView, UpdateView
 
-from .forms import AddPostForm, UploadFileForm
-from .models import News, Category, TagPost, UploadFiles
+from .forms import AddPostForm
+from .models import News, TagPost
 from .utils import DataMixin
 
 
@@ -79,10 +76,11 @@ def login(request):
 class NewsCategory(DataMixin, ListView):
     template_name = 'news/index.html'
     context_object_name = 'posts'
+    slug_url_kwarg = 'cat_slug'
     allow_empty = False
 
     def get_queryset(self):
-        return News.published.filter(cat__slug=self.kwargs['cat_slug']).select_related("cat")
+        return News.published.filter(cat__slug=self.kwargs[self.slug_url_kwarg]).select_related("cat")
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -100,15 +98,15 @@ def page_not_found(request, exception):
 class TagPostList(DataMixin, ListView):
     template_name = 'news/index.html'
     context_object_name = 'posts'
+    slug_url_kwarg = 'tag_slug'
     allow_empty = False
+    model = TagPost
 
     def get_context_data(self, *, object_list=None, **kwargs):
         context = super().get_context_data(**kwargs)
-        tag = TagPost.objects.get(slug=self.kwargs['tag_slug'])
+        tag = self.model.objects.get(slug=self.kwargs[self.slug_url_kwarg])
         return self.get_mixin_context(context, title='Тег: ' + tag.tag)
 
     def get_queryset(self):
-        return News.published.filter(tags__slug=self.kwargs['tag_slug']).select_related('cat')
-
-
-
+        return News.published.filter(tags__slug=self.kwargs[self.slug_url_kwarg]).select_related(
+            'cat').prefetch_related("tag_slug")

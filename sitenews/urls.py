@@ -19,7 +19,6 @@ from django.contrib import admin
 from django.urls import path, include
 
 from sitenews import settings
-from news import views
 from news.views import page_not_found
 
 urlpatterns = [

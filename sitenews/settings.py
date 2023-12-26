@@ -27,7 +27,6 @@ SECRET_KEY = 'babe00e8e11d559c4c2e0d445da9a58245524a2f2efab76ac61f70e86a02f0f3'
 DEBUG = int(getenv("DEBUG", 1))
 
 ALLOWED_HOSTS = getenv("ALLOWED_HOSTS", "").split()
-print("ALLOWED_HOSTS: ", ALLOWED_HOSTS)
 
 INTERNAL_IPS = [
     # ...

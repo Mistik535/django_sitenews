@@ -1,31 +1,20 @@
 from django.contrib.auth import get_user_model
 from django.core.validators import MinLengthValidator, MaxLengthValidator
 from django.db import models
-from django.template.defaultfilters import slugify
-from django.utils.text import slugify
 from django.urls import reverse
 
 
-def translit_to_eng(s: str) -> str:
-    d = {'а': 'a', 'б': 'b', 'в': 'v', 'г': 'g', 'д': 'd',
-         'е': 'e', 'ё': 'yo', 'ж': 'zh', 'з': 'z', 'и': 'i', 'к': 'k',
-         'л': 'l', 'м': 'm', 'н': 'n', 'о': 'o', 'п': 'p', 'р': 'r',
-         'с': 's', 'т': 't', 'у': 'u', 'ф': 'f', 'х': 'h', 'ц': 'c', 'ч': 'ch',
-         'ш': 'sh', 'щ': 'shch', 'ь': '', 'ы': 'y', 'ъ': '', 'э': 'r', 'ю': 'yu', 'я': 'ya'}
-
-    return "".join(map(lambda x: d[x] if d.get(x, False) else x, s.lower()))
+class Status(models.IntegerChoices):
+    DRAFT = 0, 'Не опубликовано'
+    PUBLISHED = 1, 'Опубликовано'
 
 
 class PublishedManager(models.Manager):
     def get_queryset(self):
-        return super().get_queryset().filter(is_published=News.Status.PUBLISHED)
+        return super().get_queryset().filter(is_published=Status.PUBLISHED)
 
 
 class News(models.Model):
-    class Status(models.IntegerChoices):
-        DRAFT = 0, 'Черновик'
-        PUBLISHED = 1, 'Опубликовано'
-
     title = models.CharField(max_length=255, verbose_name="Заголовок")
     slug = models.SlugField(max_length=255, unique=True, db_index=True, verbose_name="Slug", validators=[
         MinLengthValidator(5, message="Минимум 5 символов"),
@@ -52,22 +41,18 @@ class News(models.Model):
     class Meta:
         verbose_name = "Новости мира"
         verbose_name_plural = "Новости мира"
-        ordering = ['-time_created']
+        ordering = ('-time_created',)
         indexes = [
-            models.Index(fields=['-time_created'])
+            models.Index(fields=('-time_created',))
         ]
 
     def get_absolute_url(self):
         return reverse('post', kwargs={'post_slug': self.slug})
 
-    # def save(self, *args, **kwargs):
-    #     self.slug = slugify(translit_to_eng(self.title))
-    #     super().save(*args, **kwargs)
-
 
 class Category(models.Model):
     name = models.CharField(max_length=100, db_index=True, verbose_name="Категория")
-    slug = models.SlugField(max_length=255, unique=True, db_index=True)
+    slug = models.SlugField(max_length=255, unique=True)
 
     class Meta:
         verbose_name = "Категория"
@@ -82,7 +67,7 @@ class Category(models.Model):
 
 class TagPost(models.Model):
     tag = models.CharField(max_length=100, db_index=True)
-    slug = models.SlugField(max_length=255, unique=True, db_index=True)
+    slug = models.SlugField(max_length=255, unique=True)
 
     def __str__(self):
         return self.tag

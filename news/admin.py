@@ -14,7 +14,7 @@ class NewsAdmin(admin.ModelAdmin):
     filter_vertical = ['tags']
     list_display = ('title', 'post_photo', 'time_created', 'is_published', 'cat')
     list_display_links = ('title', )
-    ordering = ['-time_created', 'title']
+    ordering = ('-time_created', 'title')
     list_editable = ('is_published', )
     actions = ['set_published', 'set_draft']
     search_fields = ['title__startswith', 'cat__name']
