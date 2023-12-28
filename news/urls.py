@@ -1,9 +1,5 @@
 from django.urls import path, register_converter
 from . import views
-from . import converters
-
-
-register_converter(converters.FourDigitYearConverter, "year4")
 
 urlpatterns = [
     path('', views.NewsHome.as_view(), name='home'),  # http://127.0.0.1:8000

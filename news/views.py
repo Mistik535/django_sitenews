@@ -59,7 +59,7 @@ class AddPage(LoginRequiredMixin, DataMixin, CreateView):
 
 class UpdatePage(DataMixin, UpdateView):
     model = News
-    fields = ['title', 'content', 'photo', 'is_published', 'cat']
+    fields = ['title', 'content', 'photo', 'is_published', 'cat', "tags"]
     template_name = 'news/addpage.html'
     success_url = reverse_lazy('home')
     title_page = 'Редактирование поста'
@@ -108,5 +108,4 @@ class TagPostList(DataMixin, ListView):
         return self.get_mixin_context(context, title='Тег: ' + tag.tag)
 
     def get_queryset(self):
-        return News.published.filter(tags__slug=self.kwargs[self.slug_url_kwarg]).select_related(
-            'cat').prefetch_related("tag_slug")
+        return News.published.filter(tags__slug=self.kwargs[self.slug_url_kwarg]).select_related('cat')
